@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package resource;
+option go_package = "github.com/artificial-james/import-pipeline/protos/go/resource";
+
+message Resource {
+  string id=1;
+  string name=2;
+  string parent_id=3;
+}
+
+message CreateResourceRequest {
+  Resource resource=1;
+}
+
+service ResourceService {
+  rpc import(CreateResourceRequest) returns (Resource);
+}

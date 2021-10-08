@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+import "resource/resource.proto";
+package import;
+option go_package = "github.com/artificial-james/import-pipeline/protos/go/import";
+
+message ImportRequest {
+  ResourcePayload proto_payload=1;
+  string json_payload=2;
+}
+
+message ResourcePayload {
+  repeated resource.Resource resources=1;
+}
+
+message ImportResponse {
+  repeated string ids=1;
+}
+
+service ImportService {
+  rpc import(ImportRequest) returns (ImportResponse);
+}
