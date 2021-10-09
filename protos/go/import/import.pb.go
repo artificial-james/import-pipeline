@@ -166,6 +166,116 @@ func (x *ImportResponse) GetIds() []string {
 	return nil
 }
 
+type ImportQueue struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	StreamName string            `protobuf:"bytes,1,opt,name=stream_name,json=streamName,proto3" json:"stream_name,omitempty"`
+	StreamId   string            `protobuf:"bytes,2,opt,name=stream_id,json=streamId,proto3" json:"stream_id,omitempty"`
+	Values     map[string]string `protobuf:"bytes,3,rep,name=values,proto3" json:"values,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+}
+
+func (x *ImportQueue) Reset() {
+	*x = ImportQueue{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_import_import_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ImportQueue) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ImportQueue) ProtoMessage() {}
+
+func (x *ImportQueue) ProtoReflect() protoreflect.Message {
+	mi := &file_import_import_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ImportQueue.ProtoReflect.Descriptor instead.
+func (*ImportQueue) Descriptor() ([]byte, []int) {
+	return file_import_import_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ImportQueue) GetStreamName() string {
+	if x != nil {
+		return x.StreamName
+	}
+	return ""
+}
+
+func (x *ImportQueue) GetStreamId() string {
+	if x != nil {
+		return x.StreamId
+	}
+	return ""
+}
+
+func (x *ImportQueue) GetValues() map[string]string {
+	if x != nil {
+		return x.Values
+	}
+	return nil
+}
+
+type ImportQueueResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Queue []*ImportQueue `protobuf:"bytes,1,rep,name=queue,proto3" json:"queue,omitempty"`
+}
+
+func (x *ImportQueueResponse) Reset() {
+	*x = ImportQueueResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_import_import_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ImportQueueResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ImportQueueResponse) ProtoMessage() {}
+
+func (x *ImportQueueResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_import_import_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ImportQueueResponse.ProtoReflect.Descriptor instead.
+func (*ImportQueueResponse) Descriptor() ([]byte, []int) {
+	return file_import_import_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ImportQueueResponse) GetQueue() []*ImportQueue {
+	if x != nil {
+		return x.Queue
+	}
+	return nil
+}
+
 var File_import_import_proto protoreflect.FileDescriptor
 
 var file_import_import_proto_rawDesc = []byte{
@@ -183,16 +293,37 @@ var file_import_import_proto_rawDesc = []byte{
 	0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x2e, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x52,
 	0x09, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x22, 0x22, 0x0a, 0x0e, 0x49, 0x6d,
 	0x70, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x10, 0x0a, 0x03,
-	0x69, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x03, 0x69, 0x64, 0x73, 0x32, 0x48,
-	0x0a, 0x0d, 0x49, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12,
-	0x37, 0x0a, 0x06, 0x69, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x12, 0x15, 0x2e, 0x69, 0x6d, 0x70, 0x6f,
-	0x72, 0x74, 0x2e, 0x49, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x1a, 0x16, 0x2e, 0x69, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x2e, 0x49, 0x6d, 0x70, 0x6f, 0x72, 0x74,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x3e, 0x5a, 0x3c, 0x67, 0x69, 0x74, 0x68,
-	0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x61, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x69, 0x61,
-	0x6c, 0x2d, 0x6a, 0x61, 0x6d, 0x65, 0x73, 0x2f, 0x69, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x2d, 0x70,
-	0x69, 0x70, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x73, 0x2f, 0x67,
-	0x6f, 0x2f, 0x69, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x69, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x03, 0x69, 0x64, 0x73, 0x22, 0xbf,
+	0x01, 0x0a, 0x0b, 0x49, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x51, 0x75, 0x65, 0x75, 0x65, 0x12, 0x1f,
+	0x0a, 0x0b, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x0a, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x4e, 0x61, 0x6d, 0x65, 0x12,
+	0x1b, 0x0a, 0x09, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x08, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x49, 0x64, 0x12, 0x37, 0x0a, 0x06,
+	0x76, 0x61, 0x6c, 0x75, 0x65, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x69,
+	0x6d, 0x70, 0x6f, 0x72, 0x74, 0x2e, 0x49, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x51, 0x75, 0x65, 0x75,
+	0x65, 0x2e, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x06, 0x76,
+	0x61, 0x6c, 0x75, 0x65, 0x73, 0x1a, 0x39, 0x0a, 0x0b, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x73, 0x45,
+	0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01,
+	0x22, 0x40, 0x0a, 0x13, 0x49, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x51, 0x75, 0x65, 0x75, 0x65, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x29, 0x0a, 0x05, 0x71, 0x75, 0x65, 0x75, 0x65,
+	0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x13, 0x2e, 0x69, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x2e,
+	0x49, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x51, 0x75, 0x65, 0x75, 0x65, 0x52, 0x05, 0x71, 0x75, 0x65,
+	0x75, 0x65, 0x32, 0x8c, 0x01, 0x0a, 0x0d, 0x49, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x53, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x12, 0x37, 0x0a, 0x06, 0x49, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x12, 0x15,
+	0x2e, 0x69, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x2e, 0x49, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x69, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x2e, 0x49,
+	0x6d, 0x70, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x42, 0x0a,
+	0x11, 0x49, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69,
+	0x6f, 0x6e, 0x12, 0x15, 0x2e, 0x69, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x2e, 0x49, 0x6d, 0x70, 0x6f,
+	0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x69, 0x6d, 0x70, 0x6f,
+	0x72, 0x74, 0x2e, 0x49, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x42, 0x3e, 0x5a, 0x3c, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f,
+	0x61, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x69, 0x61, 0x6c, 0x2d, 0x6a, 0x61, 0x6d, 0x65, 0x73,
+	0x2f, 0x69, 0x6d, 0x70, 0x6f, 0x72, 0x74, 0x2d, 0x70, 0x69, 0x70, 0x65, 0x6c, 0x69, 0x6e, 0x65,
+	0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x73, 0x2f, 0x67, 0x6f, 0x2f, 0x69, 0x6d, 0x70, 0x6f, 0x72,
+	0x74, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -207,23 +338,30 @@ func file_import_import_proto_rawDescGZIP() []byte {
 	return file_import_import_proto_rawDescData
 }
 
-var file_import_import_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_import_import_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_import_import_proto_goTypes = []interface{}{
-	(*ImportRequest)(nil),     // 0: import.ImportRequest
-	(*ResourcePayload)(nil),   // 1: import.ResourcePayload
-	(*ImportResponse)(nil),    // 2: import.ImportResponse
-	(*resource.Resource)(nil), // 3: resource.Resource
+	(*ImportRequest)(nil),       // 0: import.ImportRequest
+	(*ResourcePayload)(nil),     // 1: import.ResourcePayload
+	(*ImportResponse)(nil),      // 2: import.ImportResponse
+	(*ImportQueue)(nil),         // 3: import.ImportQueue
+	(*ImportQueueResponse)(nil), // 4: import.ImportQueueResponse
+	nil,                         // 5: import.ImportQueue.ValuesEntry
+	(*resource.Resource)(nil),   // 6: resource.Resource
 }
 var file_import_import_proto_depIdxs = []int32{
 	1, // 0: import.ImportRequest.proto_payload:type_name -> import.ResourcePayload
-	3, // 1: import.ResourcePayload.resources:type_name -> resource.Resource
-	0, // 2: import.ImportService.import:input_type -> import.ImportRequest
-	2, // 3: import.ImportService.import:output_type -> import.ImportResponse
-	3, // [3:4] is the sub-list for method output_type
-	2, // [2:3] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	6, // 1: import.ResourcePayload.resources:type_name -> resource.Resource
+	5, // 2: import.ImportQueue.values:type_name -> import.ImportQueue.ValuesEntry
+	3, // 3: import.ImportQueueResponse.queue:type_name -> import.ImportQueue
+	0, // 4: import.ImportService.Import:input_type -> import.ImportRequest
+	0, // 5: import.ImportService.ImportTransaction:input_type -> import.ImportRequest
+	2, // 6: import.ImportService.Import:output_type -> import.ImportResponse
+	2, // 7: import.ImportService.ImportTransaction:output_type -> import.ImportResponse
+	6, // [6:8] is the sub-list for method output_type
+	4, // [4:6] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_import_import_proto_init() }
@@ -268,6 +406,30 @@ func file_import_import_proto_init() {
 				return nil
 			}
 		}
+		file_import_import_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ImportQueue); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_import_import_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ImportQueueResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -275,7 +437,7 @@ func file_import_import_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_import_import_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -302,6 +464,7 @@ const _ = grpc.SupportPackageIsVersion6
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ImportServiceClient interface {
 	Import(ctx context.Context, in *ImportRequest, opts ...grpc.CallOption) (*ImportResponse, error)
+	ImportTransaction(ctx context.Context, in *ImportRequest, opts ...grpc.CallOption) (*ImportResponse, error)
 }
 
 type importServiceClient struct {
@@ -314,7 +477,16 @@ func NewImportServiceClient(cc grpc.ClientConnInterface) ImportServiceClient {
 
 func (c *importServiceClient) Import(ctx context.Context, in *ImportRequest, opts ...grpc.CallOption) (*ImportResponse, error) {
 	out := new(ImportResponse)
-	err := c.cc.Invoke(ctx, "/import.ImportService/import", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/import.ImportService/Import", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *importServiceClient) ImportTransaction(ctx context.Context, in *ImportRequest, opts ...grpc.CallOption) (*ImportResponse, error) {
+	out := new(ImportResponse)
+	err := c.cc.Invoke(ctx, "/import.ImportService/ImportTransaction", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -324,6 +496,7 @@ func (c *importServiceClient) Import(ctx context.Context, in *ImportRequest, opt
 // ImportServiceServer is the server API for ImportService service.
 type ImportServiceServer interface {
 	Import(context.Context, *ImportRequest) (*ImportResponse, error)
+	ImportTransaction(context.Context, *ImportRequest) (*ImportResponse, error)
 }
 
 // UnimplementedImportServiceServer can be embedded to have forward compatible implementations.
@@ -332,6 +505,9 @@ type UnimplementedImportServiceServer struct {
 
 func (*UnimplementedImportServiceServer) Import(context.Context, *ImportRequest) (*ImportResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Import not implemented")
+}
+func (*UnimplementedImportServiceServer) ImportTransaction(context.Context, *ImportRequest) (*ImportResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ImportTransaction not implemented")
 }
 
 func RegisterImportServiceServer(s *grpc.Server, srv ImportServiceServer) {
@@ -356,13 +532,35 @@ func _ImportService_Import_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ImportService_ImportTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ImportRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImportServiceServer).ImportTransaction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/import.ImportService/ImportTransaction",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImportServiceServer).ImportTransaction(ctx, req.(*ImportRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _ImportService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "import.ImportService",
 	HandlerType: (*ImportServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "import",
+			MethodName: "Import",
 			Handler:    _ImportService_Import_Handler,
+		},
+		{
+			MethodName: "ImportTransaction",
+			Handler:    _ImportService_ImportTransaction_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -34,7 +34,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	res, err := client.Import(ctx, &pb.ImportRequest{ProtoPayload: importProto})
+	res, err := client.ImportTransaction(ctx, &pb.ImportRequest{ProtoPayload: importProto})
 	if err != nil {
 		panic(err)
 	}
