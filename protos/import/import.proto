@@ -6,7 +6,6 @@ option go_package = "github.com/artificial-james/import-pipeline/protos/go/impor
 
 message ImportRequest {
   ResourcePayload proto_payload=1;
-  string json_payload=2;
 }
 
 message ResourcePayload {

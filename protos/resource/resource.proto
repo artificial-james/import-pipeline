@@ -14,5 +14,5 @@ message CreateResourceRequest {
 }
 
 service ResourceService {
-  rpc import(CreateResourceRequest) returns (Resource);
+  rpc create(CreateResourceRequest) returns (Resource);
 }
