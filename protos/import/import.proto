@@ -13,18 +13,7 @@ message ResourcePayload {
 }
 
 message ImportResponse {
-  repeated string ids=1;
-}
-
-
-message ImportQueue {
-  string stream_name=1;
-  string stream_id=2;
-  map<string, string> values=3;
-}
-
-message ImportQueueResponse {
-  repeated ImportQueue queue=1;
+  uint32 operations=1;
 }
 
 service ImportService {

@@ -39,7 +39,7 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Fprintf(os.Stderr, "Imported [%d] resources...", len(res.Ids))
+	fmt.Fprintf(os.Stderr, "Imported [%d] resources...", res.Operations)
 }
 
 func Connect() (pb.ImportServiceClient, func()) {

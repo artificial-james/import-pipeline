@@ -63,23 +63,22 @@ func NewImport(ctx context.Context) (*Service, <-chan struct{}) {
 }
 
 func (s *Service) Import(ctx context.Context, in *pb.ImportRequest) (*pb.ImportResponse, error) {
+	fmt.Println("--> Import")
+
 	md, _ := metadata.FromIncomingContext(ctx)
 	ctx = metadata.NewOutgoingContext(ctx, md)
 
-	ids := make([]string, len(in.ProtoPayload.Resources))
-	for idx, resource := range in.ProtoPayload.Resources {
+	for _, resource := range in.ProtoPayload.Resources {
 		req := &resourcepb.CreateResourceRequest{
 			Resource: resource,
 		}
-		r, err := s.client.Create(ctx, req)
+		_, err := s.client.Create(ctx, req)
 		if err != nil {
 			return nil, err
 		}
-
-		ids[idx] = r.Id
 	}
 
-	return &pb.ImportResponse{Ids: ids}, nil
+	return &pb.ImportResponse{Operations: uint32(len(in.ProtoPayload.Resources))}, nil
 }
 
 func IncrementID(id string) (string, error) {
@@ -91,7 +90,7 @@ func IncrementID(id string) (string, error) {
 	if dashIdx > -1 {
 		n, err := strconv.Atoi(id[dashIdx+1:])
 		if err != nil {
-			return "", fmt.Errorf("Cannot increment ID: %v", err)
+			return "", fmt.Errorf("cannot increment ID: %v", err)
 		}
 		return id[:dashIdx+1] + strconv.Itoa(n+1), nil
 	}
@@ -136,6 +135,8 @@ func (s *Service) generateQueue(ctx context.Context, resources []*resourcepb.Res
 // }
 
 func (s *Service) ImportTransaction(ctx context.Context, in *pb.ImportRequest) (*pb.ImportResponse, error) {
+	fmt.Println("--> ImportTransaction")
+
 	md, _ := metadata.FromIncomingContext(ctx)
 	ctx = metadata.NewOutgoingContext(ctx, md)
 
@@ -146,8 +147,10 @@ func (s *Service) ImportTransaction(ctx context.Context, in *pb.ImportRequest) (
 	// printStage := flow.NewMap(printTask, numRunners)
 	sink := ext.NewChanSink(outChan)
 
-	// source.Via(printStage).To(sink)
-	source.Via(flow.NewPassThrough()).To(sink)
+	go func() {
+		// source.Via(printStage).To(sink)
+		source.Via(flow.NewPassThrough()).To(sink)
+	}()
 
 	queue := make([]*resourcepb.ImportQueue, 0, len(in.ProtoPayload.Resources))
 	for q := range sink.Out {
@@ -173,7 +176,11 @@ func (s *Service) ImportTransaction(ctx context.Context, in *pb.ImportRequest) (
 			if q.StreamId != "" || q.ForceId {
 				// TODO:  Do this in parallel
 				info, err := tx.XInfoStream(ctx, name).Result()
-				if err != nil {
+				if err != nil && err.Error() == "ERR no such key" {
+					info = &redis.XInfoStream{
+						LastGeneratedID: "0-0",
+					}
+				} else if err != nil {
 					return err
 				}
 
@@ -191,6 +198,8 @@ func (s *Service) ImportTransaction(ctx context.Context, in *pb.ImportRequest) (
 				}
 			}
 		}
+
+		time.Sleep(5 * time.Second)
 
 		_, err := tx.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
 			for name, q := range streams {
@@ -213,6 +222,5 @@ func (s *Service) ImportTransaction(ctx context.Context, in *pb.ImportRequest) (
 		return nil, err
 	}
 
-	// Not proper return value, but fine for now.
-	return &pb.ImportResponse{Ids: streamNames}, nil
+	return &pb.ImportResponse{Operations: uint32(len(streamNames))}, nil
 }

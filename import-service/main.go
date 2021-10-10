@@ -23,11 +23,8 @@ func main() {
 	importService, done := imp.NewImport(ctx)
 	pb.RegisterImportServiceServer(grpcServer, importService)
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 8000))
-	if err != nil {
-		panic(err)
-	}
-	err = grpcServer.Serve(lis)
+	addr := fmt.Sprintf(":%d", 8000)
+	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		panic(err)
 	}
@@ -47,6 +44,12 @@ func main() {
 		<-done
 		wg.Done()
 	}()
+
+	fmt.Printf("Serving at [%s]\n", addr)
+	err = grpcServer.Serve(lis)
+	if err != nil {
+		panic(err)
+	}
 
 	wg.Wait()
 	fmt.Printf("Shut down complete\n")

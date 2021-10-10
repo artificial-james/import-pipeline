@@ -55,6 +55,8 @@ func IncrementID(id string) (string, error) {
 }
 
 func (s *Service) Create(ctx context.Context, in *pb.CreateResourceRequest) (*pb.Resource, error) {
+	fmt.Println("--> QueueImport")
+
 	if in.Resource == nil || in.Resource.Id == "" {
 		in.Resource.Id = fmt.Sprintf("resource_%s", uuid.New().String())
 	}
@@ -105,21 +107,23 @@ func (s *Service) QueueImport(
 	ctx context.Context,
 	in *pb.CreateResourceRequest,
 ) (*pb.ImportQueueResponse, error) {
+	fmt.Println("--> QueueImport")
+
 	if in.Resource == nil || in.Resource.Id == "" {
 		in.Resource.Id = fmt.Sprintf("resource_%s", uuid.New().String())
 	}
 
 	streamName := fmt.Sprintf("resource.%s", in.Resource.Id)
 
-	// rangeN, err := s.redis.XRevRangeN(ctx, streamName, "+", "-", 1).Result()
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// lastKey := "0-0"
-	// if len(rangeN) > 0 {
-	// 	lastKey := rangeN[0].ID
-	// }
+	rangeN, err := s.redis.XRevRangeN(ctx, streamName, "+", "-", 1).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	lastKey := ""
+	if len(rangeN) > 0 {
+		lastKey = rangeN[0].ID
+	}
 
 	protoType := string(in.ProtoReflect().Descriptor().FullName())
 
@@ -138,7 +142,7 @@ func (s *Service) QueueImport(
 	return &pb.ImportQueueResponse{
 		Queue: []*pb.ImportQueue{
 			&pb.ImportQueue{
-				// StreamId:   lastKey,
+				StreamId:   lastKey,
 				StreamName: streamName,
 				ForceId:    true,
 				Values:     map[string]string{protoType: string(formattedJson.Bytes())},
