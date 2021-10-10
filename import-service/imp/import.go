@@ -199,6 +199,7 @@ func (s *Service) ImportTransaction(ctx context.Context, in *pb.ImportRequest) (
 			}
 		}
 
+		// TODO:  Remove me when done with demos.
 		time.Sleep(5 * time.Second)
 
 		_, err := tx.TxPipelined(ctx, func(pipe redis.Pipeliner) error {

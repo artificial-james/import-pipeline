@@ -120,9 +120,14 @@ func (s *Service) QueueImport(
 		return nil, err
 	}
 
-	lastKey := ""
+	lastKey := "0-0"
+	// nextKey := "0-1"
 	if len(rangeN) > 0 {
 		lastKey = rangeN[0].ID
+		// nextKey, err = IncrementID(lastKey)
+		// if err != nil {
+		// 	return nil, err
+		// }
 	}
 
 	protoType := string(in.ProtoReflect().Descriptor().FullName())
@@ -138,6 +143,16 @@ func (s *Service) QueueImport(
 	if err != nil {
 		return nil, err
 	}
+
+	// TODO:  Uncomment to demo a changed stream not caught by WATCH
+	// _, err = s.redis.XAdd(ctx, &redis.XAddArgs{
+	// 	Stream: streamName,
+	// 	ID:     nextKey,
+	// 	Values: map[string]interface{}{protoType: string(formattedJson.Bytes())},
+	// }).Result()
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	return &pb.ImportQueueResponse{
 		Queue: []*pb.ImportQueue{

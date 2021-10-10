@@ -15,6 +15,11 @@ message CreateResourceRequest {
 
 message ImportQueue {
   string stream_name=1;
+  // stream_id should be empty if you do not care what the last message in the stream is.  This
+  // probably covers most cases (event buses, most snapshots streams).  
+  // You should set this to the last known ID if you had to get something in order to build the 
+  // publish.  If this is a new stream, it should still be set to something (0-0).  This case
+  // is probably only valid for IO as we need to get the previous IO as part of each import.
   string stream_id=2;
   bool force_id=3;
   map<string, string> values=4;
