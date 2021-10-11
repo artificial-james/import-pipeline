@@ -9,8 +9,6 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	ext "github.com/reugn/go-streams/extension"
-	"github.com/reugn/go-streams/flow"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
@@ -102,7 +100,7 @@ func IncrementID(id string) (string, error) {
 	return strconv.Itoa(n + 1), nil
 }
 
-func (s *Service) generateQueue(ctx context.Context, resources []*resourcepb.Resource) chan interface{} {
+func (s *Service) asyncQueue(ctx context.Context, resources []*resourcepb.Resource) <-chan interface{} {
 	out := make(chan interface{}, numRunners)
 	go func() {
 		defer close(out)
@@ -112,7 +110,6 @@ func (s *Service) generateQueue(ctx context.Context, resources []*resourcepb.Res
 			}
 			r, err := s.client.QueueImport(ctx, req)
 			if err != nil {
-				// fmt.Fprintf(os.Stderr, "cannot queue [%s] for import\n", resource.Name)
 				out <- err
 				break
 			}
@@ -125,14 +122,74 @@ func (s *Service) generateQueue(ctx context.Context, resources []*resourcepb.Res
 	return out
 }
 
-// func printTask(in interface{}) interface{} {
-// 	if task, ok := in.(*resourcepb.ImportQueue); ok {
-// 		fmt.Printf("Watch:  %s; %v\n", task.StreamName, task.Values)
-// 	} else if _, ok := in.(error); ok {
-// 		fmt.Fprintf(os.Stderr, "Abort...\n")
-// 	}
-// 	return in
-// }
+type Info struct {
+	StreamName string
+	ID         string
+}
+
+func (s *Service) asyncInfos(
+	ctx context.Context,
+	tx *redis.Tx,
+	imports []*resourcepb.ImportQueue,
+) <-chan interface{} {
+	out := make(chan interface{}, numRunners)
+	go func() {
+		defer close(out)
+		for _, q := range imports {
+			if q.StreamId != "" || q.ForceId {
+				info, err := tx.XInfoStream(ctx, q.StreamName).Result()
+				if err != nil && err.Error() == "ERR no such key" {
+					info = &redis.XInfoStream{
+						LastGeneratedID: "0-0",
+					}
+				} else if err != nil {
+					out <- err
+					break
+				}
+
+				if q.StreamId != "" && q.StreamId != info.LastGeneratedID {
+					out <- fmt.Errorf("stream modified since import request started")
+					break
+				}
+
+				if q.ForceId {
+					nextID, err := IncrementID(info.LastGeneratedID)
+					if err != nil {
+						out <- err
+						break
+					}
+
+					out <- Info{q.StreamName, nextID}
+				}
+			}
+		}
+	}()
+	return out
+}
+
+func (s *Service) asyncAdds(
+	ctx context.Context,
+	pipe redis.Pipeliner,
+	imports []*resourcepb.ImportQueue,
+) <-chan error {
+	out := make(chan error, numRunners)
+	go func() {
+		defer close(out)
+		for _, q := range imports {
+			err := pipe.XAdd(ctx, &redis.XAddArgs{
+				Stream: q.StreamName,
+				ID:     q.StreamId,
+				Values: q.Values,
+			}).Err()
+
+			if err != nil {
+				out <- err
+				break
+			}
+		}
+	}()
+	return out
+}
 
 func (s *Service) ImportTransaction(ctx context.Context, in *pb.ImportRequest) (*pb.ImportResponse, error) {
 	fmt.Println("--> ImportTransaction")
@@ -140,20 +197,10 @@ func (s *Service) ImportTransaction(ctx context.Context, in *pb.ImportRequest) (
 	md, _ := metadata.FromIncomingContext(ctx)
 	ctx = metadata.NewOutgoingContext(ctx, md)
 
-	inChan := s.generateQueue(ctx, in.ProtoPayload.Resources)
-	outChan := make(chan interface{})
-
-	source := ext.NewChanSource(inChan)
-	// printStage := flow.NewMap(printTask, numRunners)
-	sink := ext.NewChanSink(outChan)
-
-	go func() {
-		// source.Via(printStage).To(sink)
-		source.Via(flow.NewPassThrough()).To(sink)
-	}()
-
+	queueChan := s.asyncQueue(ctx, in.ProtoPayload.Resources)
 	queue := make([]*resourcepb.ImportQueue, 0, len(in.ProtoPayload.Resources))
-	for q := range sink.Out {
+	for q := range queueChan {
+		// for q := range sink.Out {
 		if task, ok := q.(*resourcepb.ImportQueue); ok {
 			queue = append(queue, task)
 		} else if err, ok := q.(error); ok {
@@ -163,39 +210,23 @@ func (s *Service) ImportTransaction(ctx context.Context, in *pb.ImportRequest) (
 
 	streams := make(map[string]*resourcepb.ImportQueue)
 	streamNames := make([]string, 0, len(queue))
+	imports := make([]*resourcepb.ImportQueue, 0, len(queue))
 	for _, q := range queue {
 		if streams[q.StreamName] != nil {
 			return nil, fmt.Errorf("cannot update the same stream name more than once [%s]", q.StreamName)
 		}
 		streams[q.StreamName] = q
 		streamNames = append(streamNames, q.StreamName)
+		imports = append(imports, q)
 	}
 
 	err := s.redis.Watch(ctx, func(tx *redis.Tx) error {
-		for name, q := range streams {
-			if q.StreamId != "" || q.ForceId {
-				// TODO:  Do this in parallel
-				info, err := tx.XInfoStream(ctx, name).Result()
-				if err != nil && err.Error() == "ERR no such key" {
-					info = &redis.XInfoStream{
-						LastGeneratedID: "0-0",
-					}
-				} else if err != nil {
-					return err
-				}
-
-				if q.StreamId != "" && q.StreamId != info.LastGeneratedID {
-					return fmt.Errorf("stream modified since import request started")
-				}
-
-				if q.ForceId {
-					nextID, err := IncrementID(info.LastGeneratedID)
-					if err != nil {
-						return err
-					}
-
-					q.StreamId = nextID
-				}
+		infoChan := s.asyncInfos(ctx, tx, imports)
+		for i := range infoChan {
+			if info, ok := i.(Info); ok {
+				streams[info.StreamName].StreamId = info.ID
+			} else if err, ok := i.(error); ok {
+				return err
 			}
 		}
 
@@ -203,14 +234,9 @@ func (s *Service) ImportTransaction(ctx context.Context, in *pb.ImportRequest) (
 		time.Sleep(5 * time.Second)
 
 		_, err := tx.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
-			for name, q := range streams {
-				err := pipe.XAdd(ctx, &redis.XAddArgs{
-					Stream: name,
-					ID:     q.StreamId,
-					Values: q.Values,
-				}).Err()
-
-				if err != nil {
+			addChan := s.asyncAdds(ctx, pipe, imports)
+			for a := range addChan {
+				if err, ok := a.(error); ok {
 					return err
 				}
 			}
